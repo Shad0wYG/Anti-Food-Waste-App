@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize';
 import db from '../database.js';
-import list from './list.js';
+import user from '../models/user.js';
 
 const product = db.define('Products', {
     productId: {
@@ -8,11 +8,11 @@ const product = db.define('Products', {
         primaryKey: true,
         autoIncrement: true
     },
-    listId: {
+    userId: {
         type: Sequelize.INTEGER,
         references: {
-            model: list,
-            key: list.listId
+            model: user,
+            key: user.userId
         }
     },
     category: {
