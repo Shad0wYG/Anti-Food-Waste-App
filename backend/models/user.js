@@ -29,15 +29,15 @@ const user = db.define('Users', {
 
 });
 
-export async function getUserId(model, primaryKey){
-    const user = model.findByPk(primaryKey);
+export async function getUserId(primaryKey){
+    const user = user.findByPk(primaryKey);
     if(!user) throw new Error('User not found');
     return user;
 }
 
-export async function getUserByEmail(model, email){
-    const user = model.findOne({
-        where: {email}
+export async function getUserByEmail(email){
+    const user = user.findOne({
+        where: {email: email}
     });
 
     if(!user) throw new Error('Email not found');
@@ -45,23 +45,22 @@ export async function getUserByEmail(model, email){
     return user;
 }
 
-export async function createUser(model, user){
+export async function createUser(user){
     let duplicate;
 
     try{
-        duplicate = await getUserByEmail(model, user.email);
-
+        duplicate = await getUserByEmail(user.email);
     }catch(e){
-        await model.create(user);
+        await user.create(user);
     }
 
     if(duplicate) 
         throw new Error('User already exists');
 }
 
-export async function getUserByEmailAndCheckPassword(model, email, password) {
+export async function getUserByEmailAndCheckPassword(email, password) {
 	try {
-		const user = await getUserByEmail(model, email);
+		const user = await getUserByEmail(email);
 		if (user.password !== password) throw new Error('Email or Password does not match.');
 		return user;
 	} catch (e) {
@@ -69,8 +68,8 @@ export async function getUserByEmailAndCheckPassword(model, email, password) {
 	}
 }
 
-export async function deleteUser(model, id){
-    const user = await getUserId(model, id);
+export async function deleteUser(id){
+    const user = await getUserId(id);
     await user.destroy();
 }
 
