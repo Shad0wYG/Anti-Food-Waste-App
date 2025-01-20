@@ -1,35 +1,95 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import Title from "./Components/Title";
+import Button from "./Components/Button";
+import { useState } from "react";
+import Label from "./Components/Label";
+import Textbox from "./Components/Textbox";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [titleVis, setTitleVis] = useState(true);
+  const [btnVis, setBtnVis] = useState(true);
+  const [loginVis, setLoginVis] = useState(false);
+  const [signinVis, setSigninVis] = useState(false);
+
+  function handleLoginClick() {
+    setTitleVis(false);
+    setBtnVis(false);
+    setLoginVis(true);
+  }
+
+  function handleSignupClick() {
+    setTitleVis(false);
+    setBtnVis(false);
+    setSigninVis(true);
+  }
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <div id="Start Page">
+        {/*Start page start*/}
+        {titleVis && <Title />}
+        {btnVis && (
+          <div className="container text-center">
+            <div className="row justify-content-around">
+              <Button
+                children="Log in"
+                color="secondary"
+                onClick={handleLoginClick}
+              />
+              <Button
+                children="Sign up"
+                color="secondary"
+                onClick={handleSignupClick}
+              />
+            </div>
+          </div>
+        )}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+      {/*Start page end*/}
+      <div id="Login Page" className="container text-center">
+        {/*Login page start*/}
+
+        {loginVis && (
+          <>
+            <div className="row justify-content-start">
+              <Label column="3">User/Email:</Label>
+              <Textbox column="8"></Textbox>
+            </div>
+            <div className="row justify-content-start">
+              <Label column="3">Password:</Label>
+              <Textbox column="8"></Textbox>
+            </div>
+          </>
+        )}
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      {/*Login page end*/}
+
+      <div id="Sign in Page">
+        {/*Signin page start*/}
+
+        {signinVis && (
+          <>
+            <div className="row">
+              <Label column="3">Username:</Label>
+              <Textbox column="8"></Textbox>
+            </div>
+            <div className="row">
+              <Label column="3">Email:</Label>
+              <Textbox column="8"></Textbox>
+            </div>
+            <div className="row">
+              <Label column="3">Password:</Label>
+              <Textbox column="8"></Textbox>
+            </div>
+            <div className="row">
+              <Label column="3">Confirm password:</Label>
+              <Textbox column="8"></Textbox>
+            </div>
+          </>
+        )}
+      </div>
+      {/*Signin page end*/}
     </>
-  )
+  );
 }
 
-export default App
+export default App;
