@@ -1,5 +1,6 @@
 import { Sequelize } from "sequelize";
 import db from '../database.js';
+import bcrypt from 'bcrypt';
 
 const user = db.define('Users', {
     userId: {
@@ -58,10 +59,13 @@ export async function createUser(user){
         throw new Error('User already exists');
 }
 
-export async function getUserByEmailAndCheckPassword(email, password) {
+export async function getUserByEmailAndPassword(email, password) {
 	try {
 		const user = await getUserByEmail(email);
-		if (user.password !== password) throw new Error('Email or Password does not match.');
+
+        const validPassword = await bcrypt.compare(password, user.password);
+		if (!validPassword) throw new Error(`Password does not match`);
+
 		return user;
 	} catch (e) {
 		throw e;

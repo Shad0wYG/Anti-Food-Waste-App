@@ -13,7 +13,7 @@ app.use(cors());
 
 initialize();
 
-db.sync({ force: false }).then(() => {
+db.sync({ force: true }).then(() => {
     console.log('Database created/synced');
 });
 

@@ -9,8 +9,8 @@ async function initialize(){
     product.belongsTo(user, {foreignKey: 'userId'});
 
     // USER -< FRIENDS
-    user.belongsTo(friendship, {as: 'friend1', foreignKey:'userId1'});
-    user.belongsTo(friendship, {as: 'friend2', foreignKey: 'userId2'});    //I no no wanna hierarchical tables :[
+    user.hasMany(friendship, {as: 'friend1', foreignKey:'userId1'});
+    user.hasMany(friendship, {as: 'friend2', foreignKey: 'userId2'});    //I no no wanna hierarchical tables :[
     
     console.log('is ok! :D');
 }

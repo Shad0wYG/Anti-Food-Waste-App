@@ -68,4 +68,9 @@ export async function setClaimedFalse(id){
     return await product.save();
 }
 
+export async function deleteProduct(id){
+    const product = product.findByPk(id);
+    await product.destroy();
+}
+
 export default product;
