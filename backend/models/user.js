@@ -31,50 +31,47 @@ const user = db.define('Users', {
 });
 
 export async function getUserId(primaryKey){
-    const user = user.findByPk(primaryKey);
-    if(!user) throw new Error('User not found');
-    return user;
+    const selectUser = user.findByPk(primaryKey);
+    if(!selectUser) throw new Error('User not found');
+    return selectUser;
 }
 
 export async function getUserByEmail(email){
-    const user = user.findOne({
+    const selectUser = user.findOne({
         where: {email: email}
     });
 
-    if(!user) throw new Error('Email not found');
+    if(!selectUser) throw new Error('Email not found');
 
-    return user;
+    return selectUser;
 }
 
-export async function createUser(user){
+export async function createUser(newuser){
     let duplicate;
 
-    try{
-        duplicate = await getUserByEmail(user.email);
-    }catch(e){
-        await user.create(user);
-    }
 
+    duplicate = await getUserByEmail(newuser.email);
     if(duplicate) 
         throw new Error('User already exists');
+    return await user.create(newuser);
 }
 
 export async function getUserByEmailAndPassword(email, password) {
 	try {
-		const user = await getUserByEmail(email);
+		const selectUser = await getUserByEmail(email);
 
-        const validPassword = await bcrypt.compare(password, user.password);
+        const validPassword = await bcrypt.compare(password, selectUser.password);
 		if (!validPassword) throw new Error(`Password does not match`);
 
-		return user;
+		return selectUser;
 	} catch (e) {
 		throw e;
 	}
 }
 
 export async function deleteUser(id){
-    const user = await getUserId(id);
-    await user.destroy();
+    const selectUser = await getUserId(id);
+    await selectUser.destroy();
 }
 
 export default user;

@@ -1,7 +1,7 @@
 import express from 'express';
 import friendship, { removeFriend } from '../models/friendship.js';
 import { getUserId } from '../models/user.js';
-import { tokenVerification } from '../middleware.js';
+import { tokenVerification } from '../useful/middleware.js';
 
 const friendRoute = express.Router();
 

@@ -1,6 +1,6 @@
 import express from 'express';
-import { setClaimedTrue, setClaimedFalse, deleteProduct } from '../models/product.js';
-import { tokenVerification } from '../middleware.js';
+import { setClaimedTrue, setClaimedFalse, deleteProduct, createProduct } from '../models/product.js';
+import { tokenVerification } from '../useful/middleware.js';
 
 const userListRoute = express.Router();
 
@@ -23,15 +23,15 @@ userListRoute.route('/userlist/:userId').get(checkId, async( req, res) => {
             }
         });
         if(result){
-            res.status(200).json(result.product);
+            return res.status(200).json(result.product);
         }
         else{
-            res.status(404).json({
+            return res.status(404).json({
                 error: `User ${req.params.userId} has not been found.`
         });
         }
     } catch(error){
-        res.status(500).json(error);
+        return res.status(500).json(error.message);
     }
 });
 
@@ -54,23 +54,36 @@ userListRoute.route('/unclaimproduct/:productId').post(tokenVerification, async(
     try{
         if(req.params.status === true){
             await setClaimedFalse(req.params.productId);
-            res.status(200).json(`Product with ID: ${req.params.productId} has been successfully unclaimed.`);
+            return es.status(200).json(`Product with ID: ${req.params.productId} has been successfully unclaimed.`);
         }
 
     }catch(error){
-        res.status(500).json(error);
+        return res.status(500).json(error.message);
     }
 })
 
 userListRoute.route('/removeproduct/:productId').delete(tokenVerification, async(req, res)=>{
     try{
         await deleteProduct(req.params.productId);
-        res.status(200).json('product succesfully deleted');
+        return res.status(200).json('product succesfully deleted');
     }catch(err)
     {
-        res.status(500).json(err);
+       return res.status(500).json(err.message);
     }
 
+});
+
+userListRoute.route('/createproduct').post(tokenVerification, async(req,res)=>{
+    
+    const {userId, name, category, dateExp, quantity} = req.body;
+    if(!userId||!name||!category||dateExp||quantity)
+        res.status(401).json('Bad request');
+    try{
+        const product = await createProduct({userId,name,category,dateExp,quantity});
+        return res.status(201).json(product);
+    }catch(err){
+        return res.status(500).json(err.message);
+    }
 });
 
 export default userListRoute;

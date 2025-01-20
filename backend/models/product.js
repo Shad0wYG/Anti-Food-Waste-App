@@ -8,6 +8,10 @@ const product = db.define('Products', {
         primaryKey: true,
         autoIncrement: true
     },
+    name: {
+        type: Sequelize.STRING,
+        allowNull:false
+    },
     userId: {
         type: Sequelize.INTEGER,
         references: {
@@ -24,7 +28,7 @@ const product = db.define('Products', {
         defaultValue: 'meat'
     },
     dateExp: {  //best before bla bla
-        type: Sequelize.DATE,
+        type: Sequelize.DATEONLY,
         allowNull: false
     },
     quantity: {
