@@ -1,12 +1,13 @@
 import express from 'express';
 import friendship, { removeFriend } from '../models/friendship.js';
 import { getUserId } from '../models/user.js';
+import { tokenVerification } from '../middleware.js';
 
 const friendRoute = express.Router();
 
 // add a friend
 // this will just make people friends once someone presses "Add friend". This app is too irrelevant to make a complex friendship
-friendRoute.route("/addfriend/:userId").post(async (req, res) => {
+friendRoute.route("/addfriend/:userId").post(tokenVerification, async (req, res) => {
   try {
     if (req.body.userId === req.params.userId)
       res.status(400).json('You cannot befriend yourself.')
@@ -45,7 +46,7 @@ friendRoute.route("/addfriend/:userId").post(async (req, res) => {
 
 //friendship ended with this friend...now the rest of whoever i follow are my best friends
 //(remove a friend)
-friendRoute.route("/deleteFriend/:userId").delete(async (req, res) => {
+friendRoute.route("/deleteFriend/:userId").delete(tokenVerification, async (req, res) => {
   try {
     const friendThatDeletes = await getUserId(req.body.userId);
     const friendToDelete = await getUserId(req.params.userId);

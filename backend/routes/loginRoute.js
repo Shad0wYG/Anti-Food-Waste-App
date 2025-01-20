@@ -1,5 +1,6 @@
 import express from 'express';
-import { getUserByEmailAndCheckPassword } from '../models/user.js';
+import { getUserByEmailAndPassword } from '../models/user.js';
+import jwt from 'jsonwebtoken';
 
 const loginRoute = express.Router();
 
@@ -11,9 +12,9 @@ loginRoute.route('/login').post(async (req, res) => {
     if (!email || !password) return res.status(400).json('Bad Request');
 
     try {
-      let user = await getUserByEmailAndCheckPassword(email, password);
+      let user = await getUserByEmailAndPassword(email, password);
 
-      res.status(200).json({user, message:'Logged in successfully.'});
+      return res.status(200).json({ user: user, token: generateToken(user) });
     } catch (err) {
       console.warn(e.stack);
       res.status(500).json("Error while trying to login");
@@ -37,12 +38,46 @@ loginRoute.route('/register').post(async(req,res) => {
         return res.status(400).json('Passwords do not match');
     }
 
+	  password = await bcrypt.hash(password, 10);
+
     try {
         const user = await createUser({ username, email, password });
         return res.status(201).json(user);
     } catch (err) {
         return res.status(500).json(err);
     }
+});
+
+function generateToken(user) {
+	return jwt.sign(
+		{
+			userId: user.userId,
+      username: user.username,
+			email: user.email
+		},
+		process.env.ACCESS_TOKEN,
+		{
+			expiresIn: '24h',
+		}
+	);
+}
+
+loginRoute.route('/validate-token').post(async (req, res) => {
+	try {
+		const token = req.body.token;
+		if (!token) {
+			return res.status(401).json('No token provided');
+		}
+		jwt.verify(token, process.env.ACCESS_TOKEN, (err, decodedToken) => {
+			if (err) {
+				return res.status(401).json('Invalid token');
+			}
+			return res.status(200).json({ message: 'Valid token', token, userId: decodedToken.userId });
+		});
+	} catch (e) {
+		console.warn(e.stack);
+		return res.status(500).json(e.message);
+	}
 });
 
 export default loginRoute;

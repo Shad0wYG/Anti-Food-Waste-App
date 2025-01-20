@@ -1,5 +1,6 @@
 import express from 'express';
-import { setClaimedTrue, setClaimedFalse } from '../models/product.js';
+import { setClaimedTrue, setClaimedFalse, deleteProduct } from '../models/product.js';
+import { tokenVerification } from '../middleware.js';
 
 const userListRoute = express.Router();
 
@@ -35,7 +36,7 @@ userListRoute.route('/userlist/:userId').get(checkId, async( req, res) => {
 });
 
 //this happens when i check the claim checkbox
-userListRoute.route('/claimproduct/:productId').post(async(req,res)=>{
+userListRoute.route('/claimproduct/:productId').post(tokenVerification, async(req,res)=>{
     try{
         if(req.params.status === false){
             await setClaimedTrue(req.params.productId);
@@ -49,17 +50,28 @@ userListRoute.route('/claimproduct/:productId').post(async(req,res)=>{
 
 //yea... :))))))))))))
 // r/ProgrammerHumor typa dookie
-userListRoute.route('/removeproduct/:productId').post(async(req,res)=>{
+userListRoute.route('/unclaimproduct/:productId').post(tokenVerification, async(req,res)=>{
     try{
         if(req.params.status === true){
             await setClaimedFalse(req.params.productId);
-            res.status(200).json(`Product with ID: ${req.params.productId} has been successfully removed.`);
+            res.status(200).json(`Product with ID: ${req.params.productId} has been successfully unclaimed.`);
         }
 
     }catch(error){
         res.status(500).json(error);
     }
 })
+
+userListRoute.route('/removeproduct/:productId').delete(tokenVerification, async(req, res)=>{
+    try{
+        await deleteProduct(req.params.productId);
+        res.status(200).json('product succesfully deleted');
+    }catch(err)
+    {
+        res.status(500).json(err);
+    }
+
+});
 
 export default userListRoute;
 
