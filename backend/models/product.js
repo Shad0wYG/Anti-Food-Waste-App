@@ -22,7 +22,7 @@ const product = db.define('Products', {
     category: {
         type: Sequelize.STRING,
         validate: {
-            isIn: ['meat', 'fruit/vegetables', 'dairy', 'other']
+            isIn: [['meat', 'fruit/vegetables', 'dairy', 'other']]
         },
         allowNull: false,
         defaultValue: 'meat'
@@ -47,9 +47,9 @@ export async function createProduct(newProduct){
 }
 
 export async function getProductById(primaryKey){
-    const product = product.findByPk(primaryKey);
-    if(!product) throw new Error('Product not found.');
-    return product;
+    const nproduct = product.findByPk(primaryKey);
+    if(!nproduct) throw new Error('Product not found.');
+    return nproduct;
 }
 
 export async function setCategory(id, category){
@@ -60,21 +60,31 @@ export async function setCategory(id, category){
     return await product.save();
 }
 
-export async function setClaimedTrue(id){
-    const product = product.getProductById(id);
-    product.isClaimed = true;
-    return await product.save();
+export async function setClaimedFalse(idProduct){
+    try{
+        const uproduct = await getProductById(idProduct);
+    
+        uproduct.isClaimed = false;
+        return await uproduct.save();
+    }catch(err){
+        throw err;
+    }
 }
 
-export async function setClaimedFalse(id){
-    const product = product.getProductById(id);
-    product.isClaimed = false;
-    return await product.save();
+export async function setClaimedTrue(idProduct){
+    try{
+        const uproduct = await getProductById(idProduct);
+    
+        uproduct.isClaimed = true;
+        return await uproduct.save();
+    }catch(err){
+        throw err;
+    }
 }
 
 export async function deleteProduct(id){
-    const product = product.findByPk(id);
-    await product.destroy();
+    const dproduct = await getProductById(id);
+    await dproduct.destroy();
 }
 
 export default product;

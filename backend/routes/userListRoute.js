@@ -1,6 +1,7 @@
 import express from 'express';
-import { setClaimedTrue, setClaimedFalse, deleteProduct, createProduct } from '../models/product.js';
+import product, { setClaimedTrue, setClaimedFalse, deleteProduct, createProduct } from '../models/product.js';
 import { tokenVerification } from '../useful/middleware.js';
+
 
 const userListRoute = express.Router();
 
@@ -23,7 +24,7 @@ userListRoute.route('/userlist/:userId').get(checkId, async( req, res) => {
             }
         });
         if(result){
-            return res.status(200).json(result.product);
+            return res.status(200).json(result);
         }
         else{
             return res.status(404).json({
@@ -36,35 +37,28 @@ userListRoute.route('/userlist/:userId').get(checkId, async( req, res) => {
 });
 
 //this happens when i check the claim checkbox
-userListRoute.route('/claimproduct/:productId').post(tokenVerification, async(req,res)=>{
-    try{
-        if(req.params.status === false){
-            await setClaimedTrue(req.params.productId);
-            res.status(200).json(`Product with ID: ${req.params.productId} has been successfully claimed.`);
-        }
+userListRoute.route('/claimproduct').put(tokenVerification, async(req,res)=>{
 
-    }catch(error){
-        res.status(500).json(error);
+    const product = req.body;
+    if(product.isClaimed === false){
+        await setClaimedTrue(product.productId);
+        res.status(200).json(`Product with ID: ${product.productId} has been successfully claimed.`);
     }
 })
 
 //yea... :))))))))))))
 // r/ProgrammerHumor typa dookie
-userListRoute.route('/unclaimproduct/:productId').post(tokenVerification, async(req,res)=>{
-    try{
-        if(req.params.status === true){
-            await setClaimedFalse(req.params.productId);
-            return es.status(200).json(`Product with ID: ${req.params.productId} has been successfully unclaimed.`);
-        }
-
-    }catch(error){
-        return res.status(500).json(error.message);
+userListRoute.route('/unclaimproduct').post(tokenVerification, async(req,res)=>{
+    const product = req.body;
+    if(product.isClaimed === true){
+        await setClaimedFalse(product.productId);
+        res.status(200).json(`Product with ID: ${product.productId} has been successfully unclaimed.`);
     }
 })
 
-userListRoute.route('/removeproduct/:productId').delete(tokenVerification, async(req, res)=>{
+userListRoute.route('/removeproduct').delete(tokenVerification, async(req, res)=>{
     try{
-        await deleteProduct(req.params.productId);
+        await deleteProduct(req.body.productId);
         return res.status(200).json('product succesfully deleted');
     }catch(err)
     {
@@ -75,11 +69,11 @@ userListRoute.route('/removeproduct/:productId').delete(tokenVerification, async
 
 userListRoute.route('/createproduct').post(tokenVerification, async(req,res)=>{
     
-    const {userId, name, category, dateExp, quantity} = req.body;
-    if(!userId||!name||!category||dateExp||quantity)
+    const {name, userId, category, dateExp, quantity} = req.body;
+    if(!userId||!name||!category||!dateExp||!quantity)
         res.status(401).json('Bad request');
     try{
-        const product = await createProduct({userId,name,category,dateExp,quantity});
+        const product = await createProduct({name,userId,category,dateExp,quantity});
         return res.status(201).json(product);
     }catch(err){
         return res.status(500).json(err.message);

@@ -2,6 +2,7 @@ import express from 'express';
 import friendship, { removeFriend } from '../models/friendship.js';
 import { getUserId } from '../models/user.js';
 import { tokenVerification } from '../useful/middleware.js';
+import Op from 'sequelize';
 
 const friendRoute = express.Router();
 
@@ -35,18 +36,37 @@ friendRoute.route("/addfriend/:userId").post(tokenVerification, async (req, res)
         userId1: req.body.userId,
         userId2: req.params.userId,
       });
-      res.status(200).json(`New friend added: ${req.params.idUser}`);
+      res.status(200).json(`New friend added: ${req.params.userId}`);
     }
   } catch (error) {
-    console.log(error);
-    res.status(500).json(error);
+    res.status(500).json(error.message);
+  }
+});
+
+friendRoute.route("/seefriends").get(tokenVerification, async (req, res) => {
+  try {
+    const id = req.body.userId;
+    const friends = await friendship.findAll({
+      where: {
+        [Op.or]: [
+          { userId1: id },
+          { userId2: id }
+        ]
+      }
+    });
+    if (!friends)
+      res.status(400).json('user has no friends');
+    else
+      res.status(201).json(friends);
+  } catch (err) {
+    res.status(500).json(err.message);
   }
 });
 
 
 //friendship ended with this friend...now the rest of whoever i follow are my best friends
 //(remove a friend)
-friendRoute.route("/deleteFriend/:userId").delete(tokenVerification, async (req, res) => {
+friendRoute.route("/deletefriend/:userId").delete(tokenVerification, async (req, res) => {
   try {
     const friendThatDeletes = await getUserId(req.body.userId);
     const friendToDelete = await getUserId(req.params.userId);
@@ -62,8 +82,7 @@ friendRoute.route("/deleteFriend/:userId").delete(tokenVerification, async (req,
       })
     }
   } catch (err) {
-    console.log(err);
-    res.status(500).json(error);
+    res.status(500).json(err.message);
   }
 });
 

@@ -5,7 +5,6 @@ import bodyParser from 'body-parser';
 import friendRoute from './routes/friendRoute.js';
 import loginRoute from './routes/loginRoute.js';
 import userListRoute from './routes/userListRoute.js';
-import product from './models/product.js';
 
 const app = express();
 app.use(bodyParser.json());
